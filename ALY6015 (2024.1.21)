@@ -1,0 +1,349 @@
+## Rachel Li (SHU-YING, LI) 
+## ALY6015 (2024.1.21)  Module 2 Assignment — Regression Diagnostics with R
+install.packages("MASS")
+library(MASS)
+
+# Section 11-1 
+# 6.Blood Types
+# H0: The observed blood type distribution is the same as the general population distribution.
+# H1: The observed blood type distribution is different from the general population distribution.
+alpha1 <- 0.1
+ 
+# Create a vector of the values
+observed <- c(12, 8, 24, 6)
+
+# Create a vector for the probatilities
+p <- c(0.20, 0.28, 0.36, 0.16)  
+
+result1 <- chisq.test(x = observed, p = p)
+
+#View the test statistic and p-value
+result1$statistic
+result1$p.value
+result1$parameter
+
+result1
+
+#Compare the p-value to alpha and make the decision
+ifelse(result1$p.value > alpha1, "Fail to reject the null hypothesis", "Reject the null hypothesis")
+#Answer: "Fail to reject the null hypothesis"
+
+# 8.On-Time Performance by Airlines
+# H0: The on-time performance of the airline is the same as the expected distribution according to government statistics.
+# H1: The on-time performance of the airline is different from the expected distribution according to government statistics.
+
+#Set the significance level
+alpha2 <- 0.05
+
+# Airline On-Time Performance Data
+observed2 <- c(125, 10, 40, 25)  # Representing on-time, National Aviation System delay, Weather delay, Aircraft delay
+
+# Expected distribution based on government statistics (converted from percentages to quantities)
+p <- c(0.708, 0.082, 0.120, 0.090)
+
+# Perform a Chi-squared test
+result2 <- chisq.test(x = observed2, p = p)
+result2
+
+
+# Section 11-2
+# 8. Ethnicity and Movie Admissions 
+# H0: The number of movie admissions, calculated by year, is not dependent on ethnicity.
+# H1: The number of movie admissions, calculated by year, is dependent on ethnicity.
+
+# Set the significance level
+alpha3 <- 0.05
+
+# Admissions data, create the vector for each row
+r1 <- c(724, 335, 174, 107)
+r2 <- c(370, 292, 152, 140)
+
+# State the number of rows for the matrix
+rows = 2
+
+# Create the matrix from the rows
+mtrx = matrix(c(r1, r2), nrow = rows, byrow = TRUE)
+
+# Name the rows and columns
+rownames(mtrx) = c("2013", "2014")
+colnames(mtrx) = c("Caucasian", "Hispanic", "African American", "Other")
+
+#View the mtrx to ensure it match the table
+mtrx
+  
+#Run the test and save the result
+result3 <- chisq.test(mtrx)
+result3
+
+
+# 10. Women in the Military
+# Set the significance level
+alpha4 <- 0.05
+
+# Create the vector for each row
+r1 <- c(10791, 62491)
+r2 <- c(7816, 42750)
+r3 <- c(932, 9525)
+r4 <- c(11819, 54344)
+
+# State the number of rows for the matrix
+rows = 4
+
+# Create the matrix from the rows
+mtrx4 = matrix(c(r1, r2, r3, r4), nrow = rows, byrow = TRUE)
+
+# Name the rows and columns
+rownames(mtrx4) = c("Army", "Navy", "Marine Corps", "Air Force")
+colnames(mtrx4) = c("Officers", "Enlisted")
+
+#View the mtrx to ensure it match the table
+mtrx4
+
+#Run the test and save the result
+result4 <- chisq.test(mtrx4)
+result4
+
+
+# Section 12-1
+# 8. Sodium Contents of Foods
+# Set the significance level
+alpha5 <- 0.05
+
+#Create a data frame for condiments
+condiments <- data.frame('sodium' = c(270, 130, 230, 180, 80, 70, 200), 'food' = rep('condiments',7), stringsAsFactors = FALSE)
+
+#Create a data frame for cereals
+cereals <- data.frame('sodium' = c(260, 220, 290, 290, 200, 320, 140), 'food' = rep('cereals',7), stringsAsFactors = FALSE)
+
+#Create a data frame for desserts
+desserts <- data.frame('sodium' = c(100, 180, 250, 250, 300, 360, 300, 160), 'food' = rep('desserts',8), stringsAsFactors = FALSE)
+
+#Combine the data frame into one
+sodium <- rbind(condiments, cereals, desserts) 
+sodium$food <- as.factor(sodium$food)
+
+# Run the ANOVA test
+anova <- aov(sodium ~ food, data = sodium)
+  
+# View the model summary
+summary(anova)
+
+# Save summary to an object
+a.summary <- summary(anova)
+
+# Degrees of freedom
+df.numerator <- a.summary[[1]][1,"Df"] # k - 1: between group variance - numerator
+df.denominator <- a.summary[[1]][2,"Df"] # N - k: within group variance - denominator
+
+# Extract the F test value from the summary
+F.value <- a.summary[[1]][1,"F value"]
+
+# Extract the p.value value from the summary
+p.value5 <- a.summary[[1]][1,"Pr(>F)"]
+
+#determine if we should reject the null hypothesis
+ifelse(p.value5 > alpha5, "Fail to reject the null hypothesis", "Reject the null hypothesis")
+#Answer: "Fail to reject the null hypothesis"
+
+#See the differences
+TukeyHSD(anova)
+
+
+# Section 12-2
+# 10. Sales for Leading Companies
+# Set the significance level
+alpha6 <- 0.01
+
+# Create data frames for each category
+cereal <- data.frame('sales' = c(578, 320, 264, 249, 237), 'category' = rep('cereal', 5), stringsAsFactors = FALSE)
+chocolatecandy<- data.frame('sales' = c(311, 106, 109, 125, 173), 'category' = rep('chocolatecandy', 5), stringsAsFactors = FALSE)
+coffee <- data.frame('sales' = c(261, 185, 302, 689), 'category' = rep('coffee', 4), stringsAsFactors = FALSE)
+  
+# Combine the data frames into one
+sales <- rbind(cereal, chocolatecandy, coffee)
+sales$category <- as.factor(sales$category)
+
+# Run the ANOVA test
+anova6 <- aov(sales ~ category, data = sales)
+
+# View the model summary
+summary(anova6)
+
+# Save summary to an object
+a.summary <- summary(anova6)
+
+# Degrees of freedom
+# k - 1: between group variance - numerator
+df.numerator <- a.summary[[1]][1,"Df"]  
+
+# N - k: within group variance - denominator
+df.denominator <- a.summary[[1]][2,"Df"]  
+
+# Extract the F test value from the summary
+F.value <- a.summary[[1]][1,"F value"]
+
+# Extract the p.value value from the summary
+p.value6 <- a.summary[[1]][1,"Pr(>F)"]
+
+# Determine if we should reject the null hypothesis
+ifelse(p.value6 > alpha6, "Fail to reject the null hypothesis", "Reject the null hypothesis")
+#"Fail to reject the null hypothesis"
+
+# See the differences
+TukeyHSD(anova6)
+
+# 12. Per-Pupil Expenditures
+# Set the significance level
+alpha7 <- 0.05
+
+# Create data frames for each region
+eastern <- data.frame('expenditure' = c(4946, 5953, 6202, 7243, 6113), 'region' = rep('eastern', 5), stringsAsFactors = FALSE)
+middle <- data.frame('expenditure' = c(6149, 7451, 6000, 6479), 'region' = rep('middle', 4), stringsAsFactors = FALSE)
+western <- data.frame('expenditure' = c(5282, 8605, 6528, 6911), 'region' = rep('western', 4), stringsAsFactors = FALSE)
+
+# Combine the data frames into one
+expenditures <- rbind(eastern, middle, western)
+expenditures$region <- as.factor(expenditures$region)
+
+# Run the ANOVA test
+anova7 <- aov(expenditure ~ region, data = expenditures)
+
+# View the model summary
+summary(anova7)
+
+# Save summary to an object
+a.summary <- summary(anova7)
+
+# Degrees of freedom
+df.numerator <- a.summary[[1]][1,"Df"]  # k - 1: between group variance - numerator
+df.denominator <- a.summary[[1]][2,"Df"]  # N - k: within group variance - denominator
+
+# Extract the F test value from the summary
+F.value7 <- a.summary[[1]][1,"F value"]
+
+# Extract the p.value value from the summary
+p.value7 <- a.summary[[1]][1,"Pr(>F)"]
+
+# Determine if we should reject the null hypothesis
+ifelse(p.value7 > alpha7, "Fail to reject the null hypothesis", "Reject the null hypothesis")
+#"Fail to reject the null hypothesis"
+
+# See the differences
+TukeyHSD(anova7)
+
+
+
+
+# Section 12-3
+# 10. Increasing Plant Growth
+# Set the significance level
+alpha8 <- 0.05
+
+# Create data frames for each condition
+growth_light1 <- c(9.2, 9.4, 8.9)
+growth_light2 <- c(8.5, 9.2, 8.9)
+plant_nutrition_A <- data.frame('growth' = c(growth_light1, growth_light2), 'condition' = rep('A', 6))
+
+growth_light1 <- c(7.1, 7.2, 8.5)
+growth_light2 <- c(5.5, 5.8, 7.6)
+plant_nutrition_B <- data.frame('growth' = c(growth_light1, growth_light2), 'condition' = rep('B', 6))
+
+# Combine the data frames into one
+plant_growth <- rbind(plant_nutrition_A, plant_nutrition_B)
+plant_growth$condition <- as.factor(plant_growth$condition)
+plant_growth
+
+# Run the ANOVA test
+anova_result <- aov(growth ~ condition, data = plant_growth)
+
+# View the model summary
+summary(anova_result)
+
+# Save summary to an object
+a.summary <- summary(anova_result)
+
+# Degrees of freedom
+df_numerator <- a.summary[[1]][1, "Df"]  # k - 1: between group variance - numerator
+df_denominator <- a.summary[[1]][2, "Df"]  # N - k: within group variance - denominator
+
+
+# Extract the F test value from the summary
+F_value8 <- a.summary[[1]][1, "F value"]
+
+# Extract the p.value value from the summary
+p_value8 <- a.summary[[1]][1, "Pr(>F)"]
+
+# Determine if we should reject the null hypothesis
+decision <- ifelse(p_value8 > alpha8, "Fail to reject the null hypothesis", "Reject the null hypothesis")
+decision #"Reject the null hypothesis"
+
+# See the differences
+TukeyHSD(anova_result)
+
+# View the result of summary(anova_result)
+summary(anova_result)
+
+#
+#
+#
+### baseball.csv
+bb <- read.table(file = "/Users/rachel/Desktop/ALY6015/Week2/baseball.csv", header = TRUE, sep = ",")
+
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+
+# Descriptive statistics
+summary(bb)
+
+win_decade <- data.frame(W = bb$W,Decade = bb$Year)
+win_decade
+
+# Create a data frame for wins by decade
+win_decade <- bb %>%
+  mutate(Decade = cut(Year, breaks = seq(1960, 2020, by = 10), labels = c("1960s", "1970s", "1980s", "1990s", "2000s", "2010s"))) %>%
+  group_by(Decade) %>%
+  summarize(TotalWins = sum(W, na.rm = TRUE))
+win_decade
+
+# Plotting the histogram
+ggplot(win_decade, aes(x = Decade, y = TotalWins)) +
+  geom_bar(stat = "identity", fill = "lightblue", color = "black") +
+  labs(title = "Distribution of Wins by Decade",
+       x = "Decade",
+       y = "Total Wins") +
+  theme_minimal()
+
+# Chi-Square Goodness-of-Fit test
+# Set the significance level
+alpha9 <- 0.05
+# Create observed and expected frequency tables
+len <- nrow(win_decade)
+observed <- win_decade$TotalWins
+p <- rep(1/len, len)
+# Perform Chi-Square Goodness-of-Fit test
+chi_square_test <- chisq.test(observed, p = p)
+chi_square_test
+
+# Determine if we should reject the null hypothesis
+ifelse(chi_square_test$p.value > alpha9, "Fail to reject the null hypothesis", "Reject the null hypothesis")
+
+
+
+### crop_data.csv
+cd <- read.table(file = "/Users/rachel/Desktop/ALY6015/Week2/crop_data.csv", header = TRUE, sep = ",")
+
+# Descriptive statistics
+summary(cd)
+
+# Convert variables to factors
+cd$density <- as.factor(cd$density)
+cd$fertilizer <- as.factor(cd$fertilizer)
+cd$block <- as.factor(cd$block)
+
+# Perform Two-way ANOVA
+anova_result <- aov(yield ~ fertilizer * density, data = cd)
+
+# Display model summary
+summary(anova_result)
+
